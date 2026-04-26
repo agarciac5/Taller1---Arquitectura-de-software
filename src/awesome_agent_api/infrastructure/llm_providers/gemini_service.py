@@ -1,3 +1,5 @@
+"""Servicio de infraestructura para generar respuestas con Google Gemini."""
+
 import os
 
 from dotenv import load_dotenv
@@ -10,15 +12,10 @@ load_dotenv()
 
 
 class GeminiService:
-    """
-    Servicio de infraestructura para generar respuestas con Google Gemini.
-
-    Se encarga de construir el prompt, invocar el modelo y retornar el texto
-    generado para el flujo conversacional del e-commerce.
-    """
+    """Encapsula la integracion con Gemini para responder mensajes del chat"""
 
     def __init__(self) -> None:
-        """Configura el cliente de Gemini usando la API key del entorno."""
+        """Configura el cliente de Gemini usando la api key del entorno."""
         self.api_key = os.getenv("GEMINI_API_KEY")
         if not self.api_key:
             raise ChatServiceError("No se encontro GEMINI_API_KEY en las variables de entorno.")
@@ -29,7 +26,12 @@ class GeminiService:
     async def generate_response(
         self, user_message: str, products: list[Product], context: ChatContext
     ) -> str:
-        """Genera una respuesta usando Gemini con productos y contexto."""
+        """
+        Genera una respuesta usando el mensaje del usuario, productos y contexto
+
+        Raises:
+            ChatServiceError: Si ocurre un error al llamar a Gemini.
+        """
         try:
             products_info = self.format_products_info(products)
             conversation_history = context.format_for_prompt()
@@ -52,7 +54,7 @@ class GeminiService:
             raise ChatServiceError(f"Error al generar respuesta con Gemini: {error}") from error
 
     def format_products_info(self, products: list[Product]) -> str:
-        """Convierte la lista de productos a un texto legible para el prompt."""
+        """Convierte la lista de productos a texto legible para el prompt"""
         if not products:
             return "No hay productos disponibles en este momento."
 
@@ -67,7 +69,7 @@ class GeminiService:
     def _build_prompt(
         self, user_message: str, products_info: str, conversation_history: str
     ) -> str:
-        """Construye el prompt completo para enviar al modelo."""
+        """Construye el prompt completo que se envia al modelo"""
         history_section = (
             conversation_history if conversation_history else "No hay historial previo."
         )

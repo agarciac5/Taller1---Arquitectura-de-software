@@ -1,12 +1,11 @@
-class ProductNotFoundError(Exception):
-    """
-    Se lanza cuando se busca un producto que no existe.
+"""Excepciones de dominio para productos y flujo de chat."""
 
-    Permite indicar opcionalmente el ID del producto no encontrado.
-    """
+
+class ProductNotFoundError(Exception):
+    """Se lanza cuando se intenta consultar un producto que no existe"""
 
     def __init__(self, product_id: int | None = None) -> None:
-        """Crea la excepcion con un mensaje descriptivo."""
+        """Construye la excepcion con un mensaje simple o con el id"""
         if product_id is None:
             message = "Producto no encontrado"
         else:
@@ -15,24 +14,16 @@ class ProductNotFoundError(Exception):
 
 
 class InvalidProductDataError(Exception):
-    """
-    Se lanza cuando los datos de un producto son invalidos.
-
-    Permite usar un mensaje personalizado o un mensaje por defecto.
-    """
+    """Se usa cuando los datos de un producto no pasan validacion."""
 
     def __init__(self, message: str = "Datos de producto invalidos") -> None:
-        """Crea la excepcion con el mensaje indicado."""
+        """Crea la excepcion con un mensaje personalizado"""
         super().__init__(message)
 
 
 class ChatServiceError(Exception):
-    """
-    Se lanza cuando ocurre un error en el servicio de chat.
-
-    Representa errores de negocio relacionados con el flujo conversacional.
-    """
+    """Error relacionado con el servicio de chat"""
 
     def __init__(self, message: str = "Error en el servicio de chat") -> None:
-        """Crea la excepcion con el mensaje indicado."""
+        """Crea la excepcion con el mensaje recibido o el mensaje por defecto."""
         super().__init__(message)

@@ -1,3 +1,5 @@
+"""Servicio de aplicacion para casos de uso del chat con IA."""
+
 from datetime import datetime
 
 from awesome_agent_api.application.dtos import (
@@ -11,12 +13,7 @@ from awesome_agent_api.domain.repositories import IChatRepository, IProductRepos
 
 
 class ChatService:
-    """
-    Servicio de aplicación para gestionar conversaciones con IA.
-
-    Orquesta productos, historial conversacional y el servicio externo de IA
-    para generar respuestas coherentes para el usuario.
-    """
+    """Orquesta productos, historial y servicio de IA para responder al usuario."""
 
     def __init__(
         self,
@@ -24,7 +21,7 @@ class ChatService:
         chat_repository: IChatRepository,
         ai_service,
     ) -> None:
-        """Inicializa el servicio con sus dependencias principales."""
+        """Inicializa el servicio con repositorios y servicio de IA"""
         self.product_repository = product_repository
         self.chat_repository = chat_repository
         self.ai_service = ai_service
@@ -32,7 +29,18 @@ class ChatService:
     async def process_message(
         self, request: ChatMessageRequestDTO
     ) -> ChatMessageResponseDTO:
-        """Procesa un mensaje del usuario y retorna la respuesta del asistente."""
+        """
+        Procesa un mensaje del usuario y retorna la respuesta del asistente
+
+        Args:
+            request (ChatMessageRequestDTO): Mensaje enviado por el usuario
+
+        Returns:
+            ChatMessageResponseDTO: respuesta final del asistente
+
+        Raises:
+            ChatServiceError: Si algo falla durante el proceso
+        """
         try:
             products = self.product_repository.get_all()
             recent_messages = self.chat_repository.get_recent_messages(
@@ -79,7 +87,7 @@ class ChatService:
     def get_session_history(
         self, session_id: str, limit: int = 10
     ) -> list[ChatHistoryDTO]:
-        """Obtiene el historial de una sesión y lo transforma a DTOs."""
+        """Obtiene el historial de una sesion y lo convierte a DTOs"""
         messages = self.chat_repository.get_session_history(session_id, limit=limit)
         return [
             ChatHistoryDTO(
@@ -92,5 +100,5 @@ class ChatService:
         ]
 
     def clear_session_history(self, session_id: str) -> int:
-        """Elimina el historial de una sesión y retorna la cantidad eliminada."""
+        """Elimina el historial de una sesion y retorna cuantos mensajes borro."""
         return self.chat_repository.delete_session_history(session_id)

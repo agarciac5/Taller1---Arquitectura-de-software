@@ -1,3 +1,5 @@
+"""Repositorio SQLAlchemy para persistencia del historial de chat."""
+
 from sqlalchemy.orm import Session
 
 from awesome_agent_api.domain.entities import ChatMessage
@@ -6,15 +8,10 @@ from awesome_agent_api.infrastructure.db.models import ChatMemoryModel
 
 
 class SQLChatRepository(IChatRepository):
-    """
-    Implementacion de repositorio de chat usando SQLAlchemy.
-
-    Se encarga de persistir el historial de mensajes y devolverlo en orden
-    cronologico para conservar el contexto conversacional.
-    """
+    """Implementacion concreta del repositorio de chat usando SQLAlchemy."""
 
     def __init__(self, db: Session) -> None:
-        """Inicializa el repositorio con una sesion de base de datos."""
+        """Inicializa el repositorio con una sesion de base de datos"""
         self.db = db
 
     def save_message(self, message: ChatMessage) -> ChatMessage:
@@ -28,7 +25,7 @@ class SQLChatRepository(IChatRepository):
     def get_session_history(
         self, session_id: str, limit: int | None = None
     ) -> list[ChatMessage]:
-        """Obtiene el historial de una sesion en orden cronologico."""
+        """Obtiene el historial de una sesion en orden cronologico"""
         if limit is not None:
             models = (
                 self.db.query(ChatMemoryModel)
@@ -49,7 +46,7 @@ class SQLChatRepository(IChatRepository):
         return [self._model_to_entity(model) for model in models]
 
     def delete_session_history(self, session_id: str) -> int:
-        """Elimina todo el historial de una sesion y retorna la cantidad."""
+        """Elimina todo el historial de una sesion y retorna la cantidad borrada."""
         models = (
             self.db.query(ChatMemoryModel)
             .filter(ChatMemoryModel.session_id == session_id)
@@ -64,7 +61,7 @@ class SQLChatRepository(IChatRepository):
         return deleted_count
 
     def get_recent_messages(self, session_id: str, count: int) -> list[ChatMessage]:
-        """Obtiene los ultimos mensajes en orden cronologico."""
+        """Obtiene los ultimos mensajes de una sesion"""
         models = (
             self.db.query(ChatMemoryModel)
             .filter(ChatMemoryModel.session_id == session_id)
@@ -76,7 +73,7 @@ class SQLChatRepository(IChatRepository):
         return [self._model_to_entity(model) for model in models]
 
     def _model_to_entity(self, model: ChatMemoryModel) -> ChatMessage:
-        """Convierte un modelo ORM en una entidad del dominio."""
+        """Convierte un modelo ORM en una entidad de dominio."""
         return ChatMessage(
             id=model.id,
             session_id=model.session_id,
@@ -86,7 +83,7 @@ class SQLChatRepository(IChatRepository):
         )
 
     def _entity_to_model(self, entity: ChatMessage) -> ChatMemoryModel:
-        """Convierte una entidad del dominio en un modelo ORM."""
+        """Convierte una entidad de dominio en un modelo ORM"""
         return ChatMemoryModel(
             id=entity.id,
             session_id=entity.session_id,

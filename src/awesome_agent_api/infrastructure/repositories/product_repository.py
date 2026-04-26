@@ -1,3 +1,5 @@
+"""Repositorio SQLAlchemy para persistencia de productos."""
+
 from sqlalchemy.orm import Session
 
 from awesome_agent_api.domain.entities import Product
@@ -6,43 +8,38 @@ from awesome_agent_api.infrastructure.db.models import ProductModel
 
 
 class SQLProductRepository(IProductRepository):
-    """
-    Implementacion de repositorio de productos usando SQLAlchemy.
-
-    Convierte entre modelos ORM y entidades del dominio para mantener las
-    capas separadas.
-    """
+    """Implementacion concreta del repositorio de productos usando SQLAlchemy"""
 
     def __init__(self, db: Session) -> None:
         """Inicializa el repositorio con una sesion de base de datos."""
         self.db = db
 
     def get_all(self) -> list[Product]:
-        """Obtiene todos los productos almacenados."""
+        """Obtiene todos los productos almacenados"""
         models = self.db.query(ProductModel).all()
         return [self._model_to_entity(model) for model in models]
 
     def get_by_id(self, product_id: int) -> Product | None:
-        """Obtiene un producto por ID o retorna None si no existe."""
+        """Obtiene un producto por id o retorna None si no existe."""
         model = self.db.query(ProductModel).filter(ProductModel.id == product_id).first()
         if model is None:
             return None
         return self._model_to_entity(model)
 
     def get_by_brand(self, brand: str) -> list[Product]:
-        """Obtiene productos de una marca especifica."""
+        """Obtiene productos filtrados por marca"""
         models = self.db.query(ProductModel).filter(ProductModel.brand == brand).all()
         return [self._model_to_entity(model) for model in models]
 
     def get_by_category(self, category: str) -> list[Product]:
-        """Obtiene productos de una categoria especifica."""
+        """Obtiene productos filtrados por categoria."""
         models = (
             self.db.query(ProductModel).filter(ProductModel.category == category).all()
         )
         return [self._model_to_entity(model) for model in models]
 
     def save(self, product: Product) -> Product:
-        """Guarda o actualiza un producto y retorna la entidad persistida."""
+        """Guarda o actualiza un producto y retorna la entidad persistida"""
         if product.id is None:
             model = self._entity_to_model(product)
             self.db.add(model)
@@ -69,7 +66,7 @@ class SQLProductRepository(IProductRepository):
         return self._model_to_entity(model)
 
     def delete(self, product_id: int) -> bool:
-        """Elimina un producto por ID y retorna True si existia."""
+        """Elimina un producto por id y retorna True si existia"""
         model = self.db.query(ProductModel).filter(ProductModel.id == product_id).first()
         if model is None:
             return False
@@ -93,7 +90,7 @@ class SQLProductRepository(IProductRepository):
         )
 
     def _entity_to_model(self, entity: Product) -> ProductModel:
-        """Convierte una entidad del dominio en un modelo ORM."""
+        """Convierte una entidad del dominio en un modelo ORM"""
         return ProductModel(
             id=entity.id,
             name=entity.name,

@@ -1,3 +1,5 @@
+"""Entidades principales del dominio para productos y conversaciones de chat."""
+
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
@@ -6,10 +8,10 @@ from typing import Optional
 @dataclass
 class Product:
     """
-    Entidad que representa un producto en el e-commerce.
+    Entidad que representa un producto del e-commerce
 
-    Contiene los datos principales de un zapato y las reglas de negocio
-    relacionadas con precio, stock y disponibilidad.
+    Contiene la informacion principal de un zapato y reglas basicas
+    de negocio relacionadas con precio, stock y disponibilidad.
     """
 
     id: Optional[int]
@@ -23,7 +25,7 @@ class Product:
     description: str
 
     def __post_init__(self) -> None:
-        """Valida los datos del producto despues de crear la instancia."""
+        """Valida los datos del producto al momento de crearlo"""
         if not self.name.strip():
             raise ValueError("El nombre del producto no puede estar vacio.")
         if self.price <= 0:
@@ -36,7 +38,15 @@ class Product:
         return self.stock > 0
 
     def reduce_stock(self, quantity: int) -> None:
-        """Reduce el stock del producto si la cantidad solicitada es valida."""
+        """
+        Reduce el stock del producto
+
+        Args:
+            quantity (int): cantidad que se quiere descontar
+
+        Raises:
+            ValueError: Si la cantidad no es valida o supera el stock actual.
+        """
         if quantity <= 0:
             raise ValueError("La cantidad a reducir debe ser mayor a 0.")
         if quantity > self.stock:
@@ -44,7 +54,7 @@ class Product:
         self.stock -= quantity
 
     def increase_stock(self, quantity: int) -> None:
-        """Aumenta el stock del producto si la cantidad es valida."""
+        """Aumenta el stock del producto segun la cantidad enviada"""
         if quantity <= 0:
             raise ValueError("La cantidad a aumentar debe ser mayor a 0.")
         self.stock += quantity
@@ -53,10 +63,10 @@ class Product:
 @dataclass
 class ChatMessage:
     """
-    Entidad que representa un mensaje en una conversacion de chat.
+    Entidad que representa un mensaje dentro del chat.
 
-    Permite diferenciar si el mensaje fue enviado por el usuario o por el
-    asistente de IA.
+    Sirve para guardar quien envio el mensaje, el contenido
+    y la sesion a la que pertenece
     """
 
     id: Optional[int]
@@ -66,7 +76,7 @@ class ChatMessage:
     timestamp: datetime
 
     def __post_init__(self) -> None:
-        """Valida los datos del mensaje despues de crear la instancia."""
+        """Valida session_id, role y message"""
         if not self.session_id.strip():
             raise ValueError("El identificador de sesion no puede estar vacio.")
         if self.role not in ("user", "assistant"):
@@ -75,32 +85,37 @@ class ChatMessage:
             raise ValueError("El mensaje no puede estar vacio.")
 
     def is_from_user(self) -> bool:
-        """Retorna True si el mensaje fue enviado por el usuario."""
+        """Retorna True si el mensaje viene del usuario"""
         return self.role == "user"
 
     def is_from_assistant(self) -> bool:
-        """Retorna True si el mensaje fue enviado por el asistente."""
+        """Retorna True si el mensaje viene del asistente."""
         return self.role == "assistant"
 
 
 @dataclass
 class ChatContext:
     """
-    Value Object que encapsula el contexto de una conversacion.
+    contexto conversacional de una sesion
 
-    Mantiene los mensajes recientes para que el asistente pueda responder con
-    coherencia segun el historial.
+    Mantiene los mensajes recientes para poder construir
+    mejor el prompt antes de consultar la IA.
     """
 
     messages: list[ChatMessage]
     max_messages: int = 6
 
     def get_recent_messages(self) -> list[ChatMessage]:
-        """Retorna los ultimos mensajes segun el limite configurado."""
+        """Obtiene los ultimos mensajes segun el limite configurado"""
         return self.messages[-self.max_messages :]
 
     def format_for_prompt(self) -> str:
-        """Formatea el historial reciente para incluirlo en un prompt de IA."""
+        """
+        Convierte el historial reciente a texto legible para el prompt
+
+        Returns:
+            str: Texto armado con etiquetas de Usuario y Asistente
+        """
         formatted_messages = []
 
         for message in self.get_recent_messages():

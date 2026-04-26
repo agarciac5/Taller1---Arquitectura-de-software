@@ -1,3 +1,5 @@
+"""Aplicacion FastAPI principal con endpoints de productos y chat."""
+
 from datetime import datetime
 
 from fastapi import Depends, FastAPI, HTTPException, Query, status
@@ -37,13 +39,13 @@ app.add_middleware(
 
 @app.on_event("startup")
 def on_startup() -> None:
-    """Inicializa la base de datos al arrancar la aplicación."""
+    """Inicializa la base de datos al arrancar la aplicacion"""
     init_db()
 
 
 @app.get("/")
 def read_root() -> dict[str, object]:
-    """Retorna información básica de la API y sus endpoints principales."""
+    """Retorna informacion general de la API y rutas principales."""
     return {
         "name": "E-commerce con Chat IA",
         "version": "0.1.0",
@@ -61,7 +63,7 @@ def read_root() -> dict[str, object]:
 
 @app.get("/products", response_model=list[ProductDTO])
 def list_products(db: Session = Depends(get_db)) -> list[ProductDTO]:
-    """Lista todos los productos disponibles en la base de datos."""
+    """Lista todos los productos disponibles"""
     product_repository = SQLProductRepository(db)
     product_service = ProductService(product_repository)
     return product_service.get_all_products()
@@ -69,7 +71,7 @@ def list_products(db: Session = Depends(get_db)) -> list[ProductDTO]:
 
 @app.get("/products/{product_id}", response_model=ProductDTO)
 def get_product(product_id: int, db: Session = Depends(get_db)) -> ProductDTO:
-    """Obtiene un producto por su identificador."""
+    """Obtiene un producto por su identificador"""
     product_repository = SQLProductRepository(db)
     product_service = ProductService(product_repository)
 
@@ -86,7 +88,7 @@ def get_product(product_id: int, db: Session = Depends(get_db)) -> ProductDTO:
 async def send_chat_message(
     request: ChatMessageRequestDTO, db: Session = Depends(get_db)
 ) -> ChatMessageResponseDTO:
-    """Procesa un mensaje del usuario y retorna una respuesta del asistente."""
+    """Procesa un mensaje del chat y retorna la respuesta del asistente."""
     product_repository = SQLProductRepository(db)
     chat_repository = SQLChatRepository(db)
 
@@ -112,7 +114,7 @@ def get_chat_history(
     limit: int = Query(default=10, ge=1),
     db: Session = Depends(get_db),
 ) -> list[ChatHistoryDTO]:
-    """Obtiene el historial de una sesión con un límite de mensajes."""
+    """Obtiene el historial de una sesion"""
     product_repository = SQLProductRepository(db)
     chat_repository = SQLChatRepository(db)
     chat_service = ChatService(product_repository, chat_repository, ai_service=None)
@@ -123,7 +125,7 @@ def get_chat_history(
 def delete_chat_history(
     session_id: str, db: Session = Depends(get_db)
 ) -> dict[str, object]:
-    """Elimina el historial de una sesión y retorna la cantidad borrada."""
+    """Elimina el historial de una sesion."""
     product_repository = SQLProductRepository(db)
     chat_repository = SQLChatRepository(db)
     chat_service = ChatService(product_repository, chat_repository, ai_service=None)
@@ -136,7 +138,7 @@ def delete_chat_history(
 
 @app.get("/health")
 def health_check() -> dict[str, str]:
-    """Retorna el estado de salud básico de la aplicación."""
+    """Retorna el estado de salud de la aplicacion"""
     return {
         "status": "ok",
         "timestamp": datetime.utcnow().isoformat(),

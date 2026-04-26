@@ -1,3 +1,5 @@
+"""Configuracion de SQLAlchemy para conexion, sesiones e inicializacion."""
+
 import os
 from collections.abc import Generator
 
@@ -20,7 +22,12 @@ Base = declarative_base()
 
 
 def get_db() -> Generator[Session, None, None]:
-    """Provee una sesion de base de datos y la cierra al finalizar."""
+    """
+    Provee una sesion de base de datos para FastAPI
+
+    Yields:
+        Session: sesion activa de SQLAlchemy
+    """
     db = SessionLocal()
     try:
         yield db
@@ -29,7 +36,7 @@ def get_db() -> Generator[Session, None, None]:
 
 
 def init_db() -> None:
-    """Inicializa la base de datos y carga los datos iniciales."""
+    """Inicializa la base de datos creando tablas y cargando datos iniciales"""
     from awesome_agent_api.infrastructure.db import models
 
     Base.metadata.create_all(bind=engine)

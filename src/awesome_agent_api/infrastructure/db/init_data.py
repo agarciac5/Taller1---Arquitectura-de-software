@@ -1,3 +1,5 @@
+"""Carga de datos iniciales para poblar la base de datos."""
+
 from sqlalchemy.orm import Session
 
 from awesome_agent_api.infrastructure.db.database import SessionLocal
@@ -5,7 +7,7 @@ from awesome_agent_api.infrastructure.db.models import ProductModel
 
 
 def load_initial_data() -> None:
-    """Carga productos iniciales si la base de datos aun no tiene registros."""
+    """Inserta productos de ejemplo si la base de datos esta vacia"""
     session: Session = SessionLocal()
 
     try:

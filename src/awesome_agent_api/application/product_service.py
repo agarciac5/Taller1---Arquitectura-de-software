@@ -1,3 +1,5 @@
+"""Servicio de aplicacion para casos de uso relacionados con productos."""
+
 from awesome_agent_api.application.dtos import ProductDTO
 from awesome_agent_api.domain.entities import Product
 from awesome_agent_api.domain.exceptions import (
@@ -8,31 +10,26 @@ from awesome_agent_api.domain.repositories import IProductRepository
 
 
 class ProductService:
-    """
-    Servicio de aplicación para gestionar productos.
-
-    Orquesta las operaciones de productos usando el repositorio inyectado
-    y convierte entre DTOs y entidades del dominio.
-    """
+    """Orquesta operaciones de productos usando un repositorio inyectado"""
 
     def __init__(self, product_repository: IProductRepository) -> None:
         """Inicializa el servicio con un repositorio de productos."""
         self.product_repository = product_repository
 
     def get_all_products(self) -> list[ProductDTO]:
-        """Obtiene todos los productos registrados."""
+        """Obtiene todos los productos y los transforma a DTOs"""
         products = self.product_repository.get_all()
         return [ProductDTO.model_validate(product) for product in products]
 
     def get_product_by_id(self, product_id: int) -> ProductDTO:
-        """Obtiene un producto por su ID o lanza excepción si no existe."""
+        """Obtiene un producto por id o lanza ProductNotFoundError."""
         product = self.product_repository.get_by_id(product_id)
         if product is None:
             raise ProductNotFoundError(product_id)
         return ProductDTO.model_validate(product)
 
     def search_products(self, filters: dict[str, str]) -> list[ProductDTO]:
-        """Busca productos usando filtros simples por marca o categoría."""
+        """Busca productos usando filtros simples como marca o categoria"""
         if "brand" in filters and filters["brand"]:
             products = self.product_repository.get_by_brand(filters["brand"])
         elif "category" in filters and filters["category"]:
@@ -43,7 +40,7 @@ class ProductService:
         return [ProductDTO.model_validate(product) for product in products]
 
     def create_product(self, product_dto: ProductDTO) -> ProductDTO:
-        """Crea un nuevo producto a partir de un DTO validado."""
+        """Crea un producto nuevo a partir de un DTO ya validado."""
         product = self._build_product_from_dto(product_dto)
 
         try:
@@ -54,7 +51,7 @@ class ProductService:
         return ProductDTO.model_validate(saved_product)
 
     def update_product(self, product_id: int, product_dto: ProductDTO) -> ProductDTO:
-        """Actualiza un producto existente y retorna el resultado."""
+        """Actualiza un producto existente usando el id recibido"""
         existing_product = self.product_repository.get_by_id(product_id)
         if existing_product is None:
             raise ProductNotFoundError(product_id)
@@ -69,14 +66,14 @@ class ProductService:
         return ProductDTO.model_validate(saved_product)
 
     def delete_product(self, product_id: int) -> bool:
-        """Elimina un producto existente o lanza excepción si no existe."""
+        """Elimina un producto existente"""
         product = self.product_repository.get_by_id(product_id)
         if product is None:
             raise ProductNotFoundError(product_id)
         return self.product_repository.delete(product_id)
 
     def get_available_products(self) -> list[ProductDTO]:
-        """Obtiene solo los productos con stock disponible."""
+        """Obtiene solo los productos que todavia tienen stock."""
         products = self.product_repository.get_all()
         available_products = [product for product in products if product.is_available()]
         return [ProductDTO.model_validate(product) for product in available_products]
@@ -84,7 +81,7 @@ class ProductService:
     def _build_product_from_dto(
         self, product_dto: ProductDTO, product_id: int | None = None
     ) -> Product:
-        """Convierte un DTO en una entidad Product."""
+        """Convierte un ProductDTO en una entidad Product"""
         try:
             return Product(
                 id=product_id if product_id is not None else product_dto.id,

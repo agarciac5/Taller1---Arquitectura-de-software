@@ -1,3 +1,5 @@
+"""Modelos ORM de SQLAlchemy para productos y memoria de chat."""
+
 from datetime import datetime
 
 from sqlalchemy import DateTime, Float, Integer, String, Text
@@ -7,7 +9,7 @@ from awesome_agent_api.infrastructure.db.database import Base
 
 
 class ProductModel(Base):
-    """Modelo ORM para la tabla de productos."""
+    """Modelo ORM que representa la tabla products"""
 
     __tablename__ = "products"
 
@@ -23,7 +25,7 @@ class ProductModel(Base):
 
 
 class ChatMemoryModel(Base):
-    """Modelo ORM para la tabla de memoria conversacional."""
+    """Modelo ORM que representa la tabla chat_memory."""
 
     __tablename__ = "chat_memory"
 
