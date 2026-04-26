@@ -35,7 +35,7 @@ pip install -r requirements.txt
 
 Configuracion
 Crear un archivo .env con esto:
-GEMINI_API_KEY=tu_api_key_aqui
+GEMINI_API_KEY=AIzaSyD41e2powSs7I4p1jixbFrWL_3p1wm76FM
 DATABASE_URL=sqlite:///./data/ecommerce_chat.db
 ENVIRONMENT=development
 
